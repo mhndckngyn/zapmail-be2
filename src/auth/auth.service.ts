@@ -1,11 +1,15 @@
 import { Injectable } from '@nestjs/common';
-import { prisma } from 'src/lib/db';
+import { ConfigService } from '@nestjs/config';
 import * as argon2 from 'argon2';
-import { SignUpDto, LoginDto, UserDto } from './auth.types';
 import * as jwt from 'jsonwebtoken';
+import { prisma } from 'src/lib/db';
+import { LoginDto, SignUpDto, UserDto } from './auth.types';
+import { EnvSchema } from 'src/lib/env';
 
 @Injectable()
 export class AuthService {
+  constructor(private configService: ConfigService<EnvSchema>) {}
+
   async signUp({ address, name, password }: SignUpDto): Promise<boolean> {
     try {
       const hashed = await argon2.hash(password);
@@ -16,7 +20,7 @@ export class AuthService {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'x-api-key': process.env.API_KEY ?? '',
+            'x-api-key': this.configService.get('API_KEY'),
           },
           body: JSON.stringify({ name, address, password }),
         },
@@ -54,7 +58,7 @@ export class AuthService {
 
       const token = jwt.sign(
         { id: user.id, address: user.address },
-        process.env.JWT_SECRET ?? 'default-secret',
+        this.configService.get('JWT_SECRET'),
         { expiresIn: '7d' },
       );
 
