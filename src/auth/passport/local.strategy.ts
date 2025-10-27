@@ -11,9 +11,10 @@ export class LocalStrategy extends PassportStrategy(Strategy) {
   }
 
   async validate(address: string, password: string): Promise<User> {
+    // hàm này được GỌI TRƯỚC route login, sau khi hàm này return user thì user sẽ được gán vào req.user. Trong route login ta gọi authService.login(req.user) để tạo jwt
     const user = await this.authService.validateUser(address, password);
     if (!user) {
-      throw new UnauthorizedException();
+      throw new UnauthorizedException('Thông tin đăng nhập không đúng.');
     }
     return user;
   }
