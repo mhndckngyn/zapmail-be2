@@ -1,7 +1,7 @@
 import {
   HttpException,
   Injectable,
-  UnauthorizedException
+  UnauthorizedException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
@@ -9,7 +9,7 @@ import * as argon2 from 'argon2';
 import * as jwt from 'jsonwebtoken';
 import { EnvSchema } from 'src/lib/env';
 import { UsersService } from 'src/users/users.service';
-import { SignUpDto } from './auth.types';
+import { SignUpDto, UserDto, LoginDto } from './auth.types';
 
 @Injectable()
 export class AuthService {
@@ -59,7 +59,7 @@ export class AuthService {
         address: string;
       };
 
-      const user = await this.userService.findById(decoded.id);
+      const user = (await this.userService.findById(decoded.id)) as UserDto;
       return user;
     } catch {
       throw new UnauthorizedException();
@@ -68,7 +68,7 @@ export class AuthService {
 
   // [Passport] Validate user
   async validateUser(address: string, password: string) {
-    const user = await this.userService.findByAddress(address);
+    const user = (await this.userService.findByAddress(address)) as LoginDto;
     const isPasswordValid = await argon2.verify(user.password, password);
 
     if (!user || !isPasswordValid) {
