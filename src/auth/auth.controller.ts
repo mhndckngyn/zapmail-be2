@@ -1,9 +1,18 @@
-import { Body, Controller, Post, UseGuards, Req, Get } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Post,
+  UseGuards,
+  Req,
+  Get,
+  HttpCode,
+} from '@nestjs/common';
 import { AuthService } from './auth.service';
 import type { SignUpDto } from './auth.types';
 import { LocalAuthGuard } from './local-auth.guard';
 import type { Request } from 'express';
 import { JwtAuthGuard } from './jwt-auth.guard';
+import { ApiResponse } from 'src/lib/response';
 
 @Controller('auth')
 export class AuthController {
@@ -20,13 +29,30 @@ export class AuthController {
 
   @UseGuards(LocalAuthGuard)
   @Post('login')
+  @HttpCode(200)
   login(@Req() req: Request) {
-    return this.authService.login(req.user);
+    // xem giải thích trong file src/auth/passport/local.strategy.ts
+    const access_token = this.authService.login(req.user);
+    const response: ApiResponse = {
+      success: true,
+      message: 'auth:login.success',
+      content: { access_token },
+      statusCode: 200,
+    };
+
+    return response;
   }
 
   @UseGuards(JwtAuthGuard)
   @Get('me')
   async getMe(@Req() req: Request) {
-    return req.user;
+    const response: ApiResponse = {
+      success: true,
+      message: 'auth:getme.success',
+      content: req.user,
+      statusCode: 200,
+    };
+
+    return response;
   }
 }

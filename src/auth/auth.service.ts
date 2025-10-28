@@ -44,9 +44,7 @@ export class AuthService {
   login(user: any) {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
     const payload = { sub: user.id, address: user.address };
-    return {
-      access_token: this.jwtService.sign(payload),
-    };
+    return this.jwtService.sign(payload);
   }
 
   async getMe(token: string) {
@@ -69,9 +67,12 @@ export class AuthService {
   // [Passport] Validate user
   async validateUser(address: string, password: string) {
     const user = (await this.userService.findByAddress(address)) as LoginDto;
+    if (!user) { 
+      return null;
+    }
+    
     const isPasswordValid = await argon2.verify(user.password, password);
-
-    if (!user || !isPasswordValid) {
+    if (!isPasswordValid) {
       return null;
     }
 

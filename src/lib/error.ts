@@ -2,9 +2,10 @@ import {
   ArgumentsHost,
   Catch,
   ExceptionFilter,
-  HttpException
+  HttpException,
 } from '@nestjs/common';
 import { Request, Response } from 'express';
+import { ApiResponse } from './response';
 
 @Catch(HttpException)
 export class HttpExceptionFilter implements ExceptionFilter {
@@ -18,11 +19,16 @@ export class HttpExceptionFilter implements ExceptionFilter {
       console.error(exception.cause);
     }
 
-    response.status(status).json({
+    const res: ApiResponse = {
+      success: false,
       statusCode: status,
       message: exception.message,
-      timestamp: new Date().toISOString(),
-      path: request.url,
-    });
+      content: {
+        timestamp: new Date().toISOString(),
+        path: request.url,
+      },
+    };
+
+    response.status(status).json(res);
   }
 }
