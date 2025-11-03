@@ -1,24 +1,26 @@
 import {
   Body,
   Controller,
-  Post,
-  UseGuards,
-  Req,
   Get,
   HttpCode,
+  Post,
+  Req,
+  UseGuards,
 } from '@nestjs/common';
-import { AuthService } from './auth.service';
-import type { SignUpDto } from './auth.types';
-import { LocalAuthGuard } from './local-auth.guard';
+import { ApiBody } from '@nestjs/swagger';
 import type { Request } from 'express';
-import { JwtAuthGuard } from './jwt-auth.guard';
 import { ApiResponse } from 'src/lib/response';
+import { AuthService } from './auth.service';
+import { LoginDto, SignUpDto } from './auth.types';
+import { JwtAuthGuard } from './jwt-auth.guard';
+import { LocalAuthGuard } from './local-auth.guard';
 
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Post('signup')
+  @ApiBody({ type: SignUpDto })
   async signup(@Body() body: SignUpDto) {
     await this.authService.signUp(body);
     return {
@@ -29,6 +31,7 @@ export class AuthController {
 
   @UseGuards(LocalAuthGuard)
   @Post('login')
+  @ApiBody({ type: LoginDto })
   @HttpCode(200)
   login(@Req() req: Request) {
     // xem giải thích trong file src/auth/passport/local.strategy.ts
