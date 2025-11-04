@@ -4,7 +4,7 @@ import { SignUpDto } from 'src/auth/auth.types';
 import { PrismaService } from 'src/lib/prisma.service';
 
 @Injectable()
-export class UsersService {
+export class UserService {
   constructor(private prisma: PrismaService) {}
 
   async findByAddress(address: string) {

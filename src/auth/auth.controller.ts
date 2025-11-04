@@ -12,8 +12,8 @@ import type { Request } from 'express';
 import { ApiResponse } from 'src/lib/response';
 import { AuthService } from './auth.service';
 import { LoginDto, SignUpDto } from './auth.types';
-import { JwtAuthGuard } from './jwt-auth.guard';
-import { LocalAuthGuard } from './local-auth.guard';
+import { JwtAuthGuard } from './guards/jwt-auth.guard';
+import { LocalAuthGuard } from './guards/local-auth.guard';
 
 @Controller('auth')
 export class AuthController {

@@ -8,14 +8,14 @@ import { JwtService } from '@nestjs/jwt';
 import * as argon2 from 'argon2';
 import * as jwt from 'jsonwebtoken';
 import { EnvSchema } from 'src/lib/env';
-import { UsersService } from 'src/users/users.service';
+import { UserService } from 'src/user/user.service';
 import { SignUpDto, UserDto, LoginDto } from './auth.types';
 
 @Injectable()
 export class AuthService {
   constructor(
     private configService: ConfigService<EnvSchema>,
-    private userService: UsersService,
+    private userService: UserService,
     private jwtService: JwtService,
   ) {}
 
