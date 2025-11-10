@@ -19,11 +19,20 @@ export class UsersService {
 
   async createUser({ address, name, password }: SignUpDto) {
     const hashed = await argon2.hash(password);
-    await this.prisma.user.create({
+
+    const user = await this.prisma.user.create({
       data: {
         name,
         address,
         password: hashed,
+      },
+    });
+
+    await this.prisma.emailAddress.create({
+      data: {
+        address,
+        userId: user.id,
+        name,
       },
     });
   }

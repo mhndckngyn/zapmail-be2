@@ -15,9 +15,107 @@ datasource db {
 }
 
 model User {
-  id String @id @default(uuid())
-
+  id       String @id @default(uuid())
   address  String @unique
   name     String
   password String
+
+  chatbotInteraction  ChatbotInteraction?
+  threads             Thread[]
+}
+
+model ChatbotInteraction {
+  id      String @id @default(uuid())
+  day     String
+  count   Int    @default(1)
+
+  user    User   @relation(fields: [userId], references: [id])
+  userId  String @unique
+
+  @@unique([day, userId])
+  @@index([day, userId])
+}
+
+model Thread {
+  id              String   @id @default(uuid())
+  subject         String
+  lastMessageDate DateTime
+  participantIds  String[]
+  userId          String
+  user            User     @relation(fields: [userId], references: [id])
+
+  done         Boolean @default(false)
+  inboxStatus  Boolean @default(true)
+  draftStatus  Boolean @default(false)
+  sentStatus   Boolean @default(false)
+
+  emails       Email[]
+
+  @@index([userId])
+  @@index([done])
+  @@index([inboxStatus])
+  @@index([draftStatus])
+  @@index([sentStatus])
+  @@index([lastMessageDate])
+}
+
+model Email {
+  id                   String          @id @default(uuid())
+  threadId             String
+  thread               Thread          @relation(fields: [threadId], references: [id])
+  createdTime          DateTime
+  lastModifiedTime     DateTime
+  sentAt               DateTime
+  receivedAt           DateTime
+  subject              String
+  sysLabels            String[]
+  keywords             String[]
+  sensitivity          Sensitivity     @default(normal)
+  fromId               String
+  from                 EmailAddress    @relation("FromEmail", fields: [fromId], references: [id])
+  to                   EmailAddress[]  @relation("ToEmails")
+  cc                   EmailAddress[]  @relation("CcEmails")
+  bcc                  EmailAddress[]  @relation("BccEmails")
+  replyTo              EmailAddress[]  @relation("ReplyToEmails")
+  hasAttachments       Boolean
+  body                 String?
+  bodySnippet          String?
+  attachments          EmailAttachment[]
+
+  @@index([threadId])
+  @@index([sentAt])
+}
+
+model EmailAddress {
+  id            String  @id @default(uuid())
+  name          String?
+  address       String
+  userId        String
+
+  sentEmails    Email[] @relation("FromEmail")
+  receivedTo    Email[] @relation("ToEmails")
+  receivedCc    Email[] @relation("CcEmails")
+  receivedBcc   Email[] @relation("BccEmails")
+  replyToEmails Email[] @relation("ReplyToEmails")
+
+  @@unique([userId, address])
+}
+
+model EmailAttachment {
+  id        String @id @default(uuid())
+  name      String
+  mimeType  String
+  size      Int
+  inline    Boolean
+  contentId String?
+  content   String?
+  emailId   String
+  email     Email  @relation(fields: [emailId], references: [id])
+}
+
+enum Sensitivity {
+  normal
+  private
+  personal
+  confidential
 }
